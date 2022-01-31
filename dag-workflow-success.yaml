@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dag-
+spec:
+  entrypoint: main
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: a
+            template: wait-20
+          - name: b
+            template: wait-10
+          - name: c
+            template: wait-15
+          - name: d
+            template: whalesay
+            dependencies:
+              - a
+              - b
+              - c
+    - name: wait-10
+      container:
+        image: charliehpd/python-docker-10
+    - name: wait-15
+      container:
+        image: charliehpd/python-docker-10
+    - name: wait-20
+      container:
+        image: charliehpd/python-docker-20
+        resources:
+            limits:
+              memory: 128Mi
+              cpu: 100m
+    - name: whalesay
+      container:
+        image: docker/whalesay
+        command: [ cowsay ]
+        args: [ "hello world" ]
